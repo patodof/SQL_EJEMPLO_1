@@ -1,9 +1,12 @@
 package com.example.sql_ejemplo_1;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
     //Datos necesarios para ListView
     List<String> datos_contactos = new ArrayList<>();
+    List<Integer> lista_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +57,20 @@ public class MainActivity extends AppCompatActivity {
         boton_enviar.setOnClickListener(v -> {
             crearContacto();
         });
+
+        lista_contactos.setOnItemClickListener( new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int posicion, long id){
+                //al hacer click en un elemento de la lista, buscamos ese elmento en la lista de id y lo enviamos a detalle activity
+
+                Integer id_actual = lista_id.get(posicion);
+
+                Intent intent_detalle = new Intent(MainActivity.this, DetalleActivity.class);
+                intent_detalle.putExtra("id_actual", id_actual);
+                startActivity(intent_detalle);
+            }
+        });
     }
 
     public void cargarContactos()
@@ -61,6 +79,8 @@ public class MainActivity extends AppCompatActivity {
         SQLiteDatabase db = admin.getReadableDatabase();
 
         datos_contactos = new ArrayList<>();
+        lista_id = new ArrayList<Integer>();
+
         //CONSULTAR DATOS A LA BASE DE DATOS
         Cursor fila = db.rawQuery("SELECT id,nombre,telefono FROM contactos", null);
 
@@ -76,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
                 String contacto_actual = "# "+id_actual+" nombre "+nombre_actual+" telefono "+telefono_actual;
                 datos_contactos.add(contacto_actual);
+                lista_id.add(id_actual);
                 
             } while (fila.moveToNext());
         }
